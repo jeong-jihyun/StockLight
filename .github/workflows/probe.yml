@@ -1,0 +1,28 @@
+name: probe
+
+# 수동 실행 전용: GitHub 서버에서 data.go.kr API가 호출되는지 확인한다.
+# 실행: 저장소의 Actions 탭 > probe > Run workflow
+on:
+  workflow_dispatch:
+    inputs:
+      stock:
+        description: 점검할 종목명
+        default: 삼성전자
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: API 점검
+        env:
+          DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
+          STOCK: ${{ inputs.stock }}
+        run: node collector/probe.mjs "$STOCK"
